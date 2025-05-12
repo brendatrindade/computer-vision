@@ -1,0 +1,54 @@
+hardware:
+  camera:
+    resolution: [640, 480]
+    fps: 30
+    flip_horizontal: true # Espelha a imagem
+
+# Parametros de deteccao
+
+#        8  12   16   20
+#        |   |   |    |
+#        7  11   15   19
+#    4   |   |   |    |
+#    |   6  10   14   18
+#    3   |   |   |    |
+#    |   5---9---13---17
+#    2   \            /
+#     \   \          /
+#      1   \        /
+#       \   \      /
+#        0-----0
+
+landmarks:
+  # Pulso e Base (wrist)
+  0: "wrist" # Centro da base da mao
+  
+  # Polegar (Thumb) - 4
+  1: "thumb_base" # Base na palma
+  2: "thumb_mid" # Junta do meio
+  3: "thumb_top" # Junta superior
+  4: "thumb_tip" # Ponta do polegar
+
+  # Indicador (Index) - 8
+  5: "index_base" # Base na palma
+  6: "index_mid" # Junta do meio
+  7: "index_top" # Junta superior
+  8: "index_tip" # Ponta do indicador
+
+  # Dedo Medio (Middle) - 12
+  9: "middle_base" # Base na palma
+  10: "middle_mid" # Junta do meio
+  11: "middle_top" # Junta superior
+  12: "middle_tip" # Ponta do medio
+
+  # Anelar (Ring) - 16
+  13: "ring_base" # Base na palma
+  14: "ring_mid" # Junta do meio
+  15: "ring_top" # Junta superior
+  16: "ring_tip" # Ponta do anelar
+
+  # Mindinho (Pinky) - 20
+  17: "pinky_base" # Base na palma
+  18: "pinky_mid" # Junta do meio
+  19: "pinky_top" # Junta superior
+  20: "pinky_tip" # Ponta do mindinho

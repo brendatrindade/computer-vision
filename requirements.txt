@@ -3,7 +3,10 @@ python-dotenv==0.19.2
 mediapipe==0.10.21
 pyautogui==0.9.53
 numpy==1.22.3
+pyyaml>=6.0
+keyboard
 # para usar python 3.10:
 # py -3.10 -m venv venv                
 #.\venv\Scripts\activate
-# (venv)...> pip install -r requirements.txt 
+# (venv)...> pip install -r requirements.txt
+#executar: python main.py
