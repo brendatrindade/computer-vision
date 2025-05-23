@@ -1,121 +1,93 @@
-import cv2
-import mediapipe as mp
+import pygame
 import time
-from core_auto import captura
-from core_auto.configuracao_yaml import Configuracao_yaml
+from movimento.personagem import Personagem
+from movimento.obstaculo import Obstaculo
+from utils import utils
+import random
+
+def colisao(personagem, obstaculos, tela):
+    # linhas x colunas no quadro de sprites do personagem
+    n_linha_personagem = min(personagem.direcao, len(personagem.quadros) - 1)
+    n_coluna_personagem = int(personagem.frame) % len(personagem.quadros[n_linha_personagem])
+    #quadro atual
+    quadro_personagem = personagem.quadros[n_linha_personagem][n_coluna_personagem]
+    mascara_personagem = pygame.mask.from_surface(quadro_personagem)
+    for obstaculo in obstaculos:
+        linha_obstaculo = min(obstaculo.direcao, len(obstaculo.quadros) - 1)
+        coluna_obstaculo = int(obstaculo.frame) % len(obstaculo.quadros[linha_obstaculo])
+        quadro_obstaculo = obstaculo.quadros[linha_obstaculo][coluna_obstaculo]
+        mascara_obstaculo = pygame.mask.from_surface(quadro_obstaculo)
+        offset = (int(obstaculo.x - personagem.x), int(obstaculo.y - personagem.y))
+        
+        pygame.draw.rect(tela, (255, 0, 0), quadro_personagem.get_rect(topleft=(personagem.x, personagem.y)), 2)
+        pygame.draw.rect(tela, (0, 0, 255), quadro_obstaculo.get_rect(topleft=(obstaculo.x, obstaculo.y)), 2)
+        if mascara_personagem.overlap(mascara_obstaculo, offset):
+            return True
+
+def criar_jogo():
+    personagem = Personagem()
+
+    assets = ['./assets/boneco.png', './assets/barril.png', './assets/cacto.png', './assets/muralha.png', './assets/pc.png',]
+    
+    obstaculo1 = Obstaculo(x=0, y=0)
+    obstaculo2 = Obstaculo(x=600, y=440)
+    obstaculo3 = Obstaculo(caminho_img='./assets/sapo.png', l_q=71, a_q=48)
+    obstaculo4 = Obstaculo(caminho_img=random.choice(assets))
+    obstaculo5 = Obstaculo(caminho_img=random.choice(assets))
+    obstaculo6 = Obstaculo(caminho_img=random.choice(assets))
+    
+    return personagem, [obstaculo1, obstaculo2, obstaculo3, obstaculo4, obstaculo5, obstaculo6]
 
 def main():
-    # Carrega a configuração do arquivo YAML
-    yaml = Configuracao_yaml()
-    if not yaml.config:
-        return
+    pygame.init()
+    tela = pygame.display.set_mode((640, 480))
+    pygame.display.set_caption("Robozinho")
+    #img_personagem = pygame.image.load('./assets/me.png').convert_alpha()
+    #img_personagem = pygame.transform.scale(img_personagem, (35, 35))
     
-    # Captura video da webcam
-    captura_video = cv2.VideoCapture(0)  # 0 para a webcam padrao
-    captura_video.set(cv2.CAP_PROP_FRAME_WIDTH, yaml.resolucao[0]) #largura - x
-    captura_video.set(cv2.CAP_PROP_FRAME_HEIGHT, yaml.resolucao[1]) #altura - y
-    captura_video.set(cv2.CAP_PROP_FPS, yaml.fps) 
+    clock = pygame.time.Clock()
+    running = True
+    personagem, obstaculos = criar_jogo()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    print("Sistema iniciado. Aguardando leitura das maos...")
+        tela.fill((250, 250, 250)) # Cor do fundo
+        personagem.mover()
+        personagem.desenhar(tela)
+        for obstaculo in obstaculos:
+            obstaculo.mover_horizontal()
+            obstaculo.desenhar(tela)
 
-    with mp.solutions.hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9,  max_num_hands=2, model_complexity=1) as maos:
-        try:
-            while captura_video.isOpened():
-                # Le um frame da webcam
-                sucesso_captura, frame = captura_video.read()
-                if not sucesso_captura:
-                    continue
-                if yaml.flip_horizontal:
-                    frame = cv2.flip(frame, 1) #espelha 
+        if colisao(personagem, obstaculos, tela):
+            pygame.display.flip()
+            esperando = True
+            piscar = True
+            tempo_pisca = 0
+            while esperando:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        esperando = False
+                        running = False
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                        personagem, obstaculos = criar_jogo()
+                        esperando = False
+                tela.fill((250, 250, 250))
+                # Pisca a cada 10 frames
+                if piscar:
+                    personagem.desenhar(tela)
+                for obstaculo in obstaculos:
+                    obstaculo.desenhar(tela)
+                pygame.display.flip()
+                tempo_pisca += 1
+                if tempo_pisca % 10 == 0:
+                    piscar = not piscar
+                clock.tick(30)
 
-                movimento, parametros_detectados = captura.captura_mao(frame, maos)
-                if movimento and parametros_detectados:
-                    n_dedos = len(movimento)
-                    cor_texto = (0,0,0) # BGR
-                    if n_dedos >= 1:
-                        cv2.putText(
-                            frame, 
-                            movimento[0],
-                            (10, 30), # posicao
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.75, # escala da fonte
-                            cor_texto, # cor 
-                            1, # espessura da linha
-                            cv2.LINE_AA
-                        )
-                    if n_dedos >= 2:
-                        cv2.putText(
-                            frame, 
-                            movimento[1],
-                            (10, 60), # posicao 
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.75, # escala da fonte
-                            cor_texto, # cor 
-                            1, # espessura da linha
-                            cv2.LINE_AA
-                        )
-                    if n_dedos >= 3:
-                        cv2.putText(
-                            frame, 
-                            movimento[2],
-                            (10, 90), # posicao 
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.75, # escala da fonte
-                            cor_texto, # cor 
-                            1, # espessura da linha
-                            cv2.LINE_AA
-                        )
-                    if n_dedos >= 4:
-                        cv2.putText(
-                            frame, 
-                            movimento[3],
-                            (10, 120), # posicao
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.75, # escala da fonte
-                            cor_texto, # cor 
-                            1, # espessura da linha
-                            cv2.LINE_AA
-                        )
-                    if n_dedos == 5:
-                        cv2.putText(
-                            frame, 
-                            movimento[4],
-                            (10, 150), # posicao
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.75, # escala da fonte
-                            cor_texto, # cor 
-                            1, # espessura da linha
-                            cv2.LINE_AA
-                        )
-                    print("Dedos detectados:", " - ".join(movimento))
-                else:
-                    cv2.putText(
-                        frame, 
-                        "Por favor, deixe uma mao visivel para iniciar",
-                        (10, 30), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.75,
-                        (0, 0, 0), 
-                        1, 
-                        cv2.LINE_AA
-                    )
+        pygame.display.flip()
+        clock.tick(30)  # Limita a 30 FPS
 
-                # Exibe o frame com os parametros de deteccao desenhados
-                cv2.imshow(
-                    "Captura movimento da mao", 
-                    frame
-                )
-                
-                if cv2.waitKey(1) & 0xFF == ord('f'):
-                    print("Sistema encerrado pelo usuario")
-                    break #se a tecla f for pressionada
-
-                time.sleep(0.1)
-        except KeyboardInterrupt:
-            print("Sistema encerrado pelo usuario")
-        finally:
-            captura_video.release()
-            cv2.destroyAllWindows()
-
+    pygame.quit()
 if __name__ == "__main__":
     main()
