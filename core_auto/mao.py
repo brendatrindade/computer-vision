@@ -1,4 +1,4 @@
-from core import utils
+from utils import utils
 
 nome_dedo = {
     4: "polegar",
@@ -42,13 +42,14 @@ def movimento_dedo_n(parametros_detectados, ponta_dedo):
     deteccao_x = parametros_detectados[ponta_dedo][0] - parametros_detectados[base_dedo][0]
 
     if deteccao_y > limiar_deteccao:
-        return f"{nome_dedo[ponta_dedo]} cima"
+        return f"{nome_dedo[ponta_dedo]} cima", 8
     elif deteccao_y < -limiar_deteccao:
-        return f"{nome_dedo[ponta_dedo]} baixo"
+        return f"{nome_dedo[ponta_dedo]} baixo", 2
     elif deteccao_x > limiar_deteccao:
-        return f"{nome_dedo[ponta_dedo]} direita"
+        return f"{nome_dedo[ponta_dedo]} direita", 6
     elif deteccao_x < -limiar_deteccao:
-        return f"{nome_dedo[ponta_dedo]} esquerda"
+        return f"{nome_dedo[ponta_dedo]} esquerda", 4
+    return None, None
 
 def movimento_todos_dedos(parametros_detectados):
     estado_atual = []
