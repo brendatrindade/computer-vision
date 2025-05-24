@@ -1,2 +1,2 @@
-# hands-controls
-Projeto de visão computacional utilizando a webcam para reconhecimento de gestos com as mãos em tempo real mapeando-os para comandos no sistema.
+# Computer Vision
+Sistema de visão computacional capaz de capturar imagens em tempo real via webcam e realizar o reconhecimento de gestos realizados com as mãos.
