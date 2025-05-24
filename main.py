@@ -2,7 +2,6 @@ import pygame
 import time
 from movimento.personagem import Personagem
 from movimento.obstaculo import Obstaculo
-from utils import utils
 import random
 
 def colisao(personagem, obstaculos, tela):
@@ -19,32 +18,29 @@ def colisao(personagem, obstaculos, tela):
         mascara_obstaculo = pygame.mask.from_surface(quadro_obstaculo)
         offset = (int(obstaculo.x - personagem.x), int(obstaculo.y - personagem.y))
         
-        pygame.draw.rect(tela, (255, 0, 0), quadro_personagem.get_rect(topleft=(personagem.x, personagem.y)), 2)
-        pygame.draw.rect(tela, (0, 0, 255), quadro_obstaculo.get_rect(topleft=(obstaculo.x, obstaculo.y)), 2)
+        #pygame.draw.rect(tela, (255, 0, 0), quadro_personagem.get_rect(topleft=(personagem.x, personagem.y)), 2)
+        #pygame.draw.rect(tela, (0, 0, 255), quadro_obstaculo.get_rect(topleft=(obstaculo.x, obstaculo.y)), 2)
         if mascara_personagem.overlap(mascara_obstaculo, offset):
             return True
 
 def criar_jogo():
     personagem = Personagem()
-
     assets = ['./assets/boneco.png', './assets/barril.png', './assets/cacto.png', './assets/muralha.png', './assets/pc.png',]
     
-    obstaculo1 = Obstaculo(x=0, y=0)
-    obstaculo2 = Obstaculo(x=600, y=440)
+    obstaculo1 = Obstaculo(caminho_img=random.choice(assets), x=0, y=0)
+    obstaculo2 = Obstaculo(caminho_img=random.choice(assets), x=600, y=440)
     obstaculo3 = Obstaculo(caminho_img='./assets/sapo.png', l_q=71, a_q=48)
     obstaculo4 = Obstaculo(caminho_img=random.choice(assets))
-    obstaculo5 = Obstaculo(caminho_img=random.choice(assets))
-    obstaculo6 = Obstaculo(caminho_img=random.choice(assets))
+    #obstaculo5 = Obstaculo(caminho_img=random.choice(assets))
+    #obstaculo6 = Obstaculo(caminho_img=random.choice(assets))
     
-    return personagem, [obstaculo1, obstaculo2, obstaculo3, obstaculo4, obstaculo5, obstaculo6]
+    return personagem, [obstaculo1, obstaculo2, obstaculo3, obstaculo4]
 
 def main():
     pygame.init()
     tela = pygame.display.set_mode((640, 480))
     pygame.display.set_caption("Robozinho")
-    #img_personagem = pygame.image.load('./assets/me.png').convert_alpha()
-    #img_personagem = pygame.transform.scale(img_personagem, (35, 35))
-    
+        
     clock = pygame.time.Clock()
     running = True
     personagem, obstaculos = criar_jogo()
